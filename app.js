@@ -1,55 +1,75 @@
 const express = require('express');
 const path = require('path');
-const fs =require('fs');
+const fs = require('fs');
 const app = express();
+const uuid = require('uuid')
 
-app.set('views',path.join(__dirname,'views'));
-app.set('view engine','ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 //Middleware to look into requests and extract their data 
-app.use(express.urlencoded({extended:false}))
+app.use(express.urlencoded({ extended: false }))
 
 //Serving Static files
 app.use(express.static('public'))
 
 //Creating Routes for different HTML pages
-app.get('/',function(req,res){
+app.get('/', function (req, res) {
     res.render('index')
-    
+
 });
-app.get('/restaurants',function(req,res){
+app.get('/restaurants', function (req, res) {
 
     const filePath = path.join(__dirname, 'data', 'restaurants.json');
 
     const fileData = fs.readFileSync(filePath);
     const storedRestaurants = JSON.parse(fileData);
-   res.render('restaurants', {
-    numberOfRestaurants: storedRestaurants.length,
-    restaurants: storedRestaurants,
-  });
+    res.render('restaurants', {
+        numberOfRestaurants: storedRestaurants.length,
+        restaurants: storedRestaurants,
+    });
 });
-app.get('/about',function(req,res){
+app.get('/about', function (req, res) {
     res.render('about')
 });
-app.get('/confirm',function(req,res){
+app.get('/confirm', function (req, res) {
     res.render('confirm')
 });
-app.get('/recommend',function(req,res){
+app.get('/recommend', function (req, res) {
     res.render('recommend')
 });
-//Creating Post Requets paths
-app.post('/recommend',function(req,res){
-    const restaurant = req.body;
 
-    const filePath = path.join(__dirname,'data','restaurants.json')
-    const fileData =fs.readFileSync(filePath);
+//Creating the Dynamic Route 
+app.get('/restaurants/:id', function (req, res) {
+    //Searching for the Item in the file with the same id as we get from the URL 
+    const resId = req.params.id;
+
+    const filePath = path.join(__dirname, 'data', 'restaurants.json');
+    const fileData = fs.readFileSync(filePath);
+    const storedRestaurants = JSON.parse(fileData);
+    for (let rest of storedRestaurants) {
+        if (rest.id === resId) {
+             return res.render('restaurant-details', { restaurant: rest })
+        }
+    }
+
+
+});
+
+//Creating Post Requets paths
+app.post('/recommend', function (req, res) {
+    const restaurant = req.body;
+    //adding a unique ID with the help of uuid
+    restaurant.id = uuid.v4();
+    const filePath = path.join(__dirname, 'data', 'restaurants.json')
+    const fileData = fs.readFileSync(filePath);
     const storedRestuarants = JSON.parse(fileData);
 
     storedRestuarants.push(restaurant);
-    fs.writeFileSync(filePath,JSON.stringify(storedRestuarants));
+    fs.writeFileSync(filePath, JSON.stringify(storedRestuarants));
 
     res.redirect('/confirm');
-    
+
 });
 
 
