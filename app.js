@@ -50,6 +50,8 @@ app.get('/restaurants/:id', function (req, res) {
     for (let rest of storedRestaurants) {
         if (rest.id === resId) {
              return res.render('restaurant-details', { restaurant: rest })
+        }else{
+            res.render('error.ejs')
         }
     }
 
@@ -72,5 +74,12 @@ app.post('/recommend', function (req, res) {
 
 });
 
-
+//adding a middleware for incorrect routes 
+app.use(function(req,res){
+res.render('error')
+})
+//adding a middleware for error on the server 
+app.use(function(error,res,res,next){
+res.render('500')
+})
 app.listen(4500);
