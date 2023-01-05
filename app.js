@@ -76,10 +76,10 @@ app.post('/recommend', function (req, res) {
 
 //adding a middleware for incorrect routes 
 app.use(function(req,res){
-res.render('error')
+res.status(404).render('error')
 })
 //adding a middleware for error on the server 
 app.use(function(error,res,res,next){
-res.render('500')
+res.status(500).render('500')
 })
 app.listen(4500);
